@@ -45,10 +45,5 @@ Webhook (POST) → Gemini IA → Formatar Resposta → HTTP Request (PUT para Ba
 6. O frontend exibira o resultado
 
 
-api gemini
-
-AQ.Ab8RN6ILp9cX0ZN0gK2UzNZDNPn4dTGjSGfdHLXEYOgPZDegaw
-
-
 FORCA PARADA DA PORTA 8080
 $ Stop-Process -Id 22128 -Force; Start-Sleep -Seconds 2; Write-Host "Processo 22128 morto. Porta 8080 liberada."
