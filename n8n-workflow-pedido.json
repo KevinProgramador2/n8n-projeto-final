@@ -16,61 +16,150 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{\n  JSON.stringify({\n    contents: [{\n      parts: [{\n        text: \"Voce e um consultor de vendas de uma loja virtual de tecnologia.\\n\\nAnalise o pedido recebido:\\n- Cliente: {{ $json.cliente }}\\n- Cidade: {{ $json.cidade }}\\n- Valor Total: R$ {{ $json.valorTotal }}\\n- Produtos: {{ JSON.stringify($json.produtos) }}\\n\\nRetorne OBRIGATORIAMENTE um JSON valido com as chaves:\\n{\\n  \\\"perfilCliente\\\": \\\"Classificacao baseada no valor (ex: Cliente Premium, Cliente Gold, Cliente Essencial)\\\",\\n  \\\"produtosRecomendados\\\": \\\"Lista de produtos complementares separados por virgula\\\",\\n  \\\"mensagemPersonalizada\\\": \\\"Mensagem amigavel com recompensa (cupom de desconto)\\\"\\n}\\n\\nRegras:\\n- Se valorTotal > 2000: perfil = Cliente Premium, cupom = PREMIUM15 (15%)\\n- Se valorTotal > 1000: perfil = Cliente Gold, cupom = GOLD10 (10%)\\n- Se valorTotal <= 1000: perfil = Cliente Essencial, cupom = ESSENTIAL5 (5%)\\n- Recomende produtos complementares aos adquiridos\\n- A mensagem deve ser amigavel e motivar nova compra\\n- Retorne APENAS o JSON, sem texto adicional\"\n      }]\n    }],\n    generationConfig: {\n      temperature: 0.7,\n      maxOutputTokens: 1024\n    }\n  })\n}}"
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "val-cliente",
+              "leftValue": "={{ ($json.body?.cliente || $json.cliente || '') }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "isNotEmpty" }
+            },
+            {
+              "id": "val-id",
+              "leftValue": "={{ ($json.body?.id || $json.id || 0) }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "gemini-1",
-      "name": "Gemini IA",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [500, 300],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "CONFIGURAR_COM_SUA_CREDENCIAL",
-          "name": "Gemini API Key"
-        }
-      }
+      "id": "filter-1",
+      "name": "Validar Dados",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [450, 300]
     },
     {
       "parameters": {
-        "jsCode": "const response = JSON.parse($input.first().json.candidates[0].content.parts[0].text.replace('```json', '').replace('```', '').trim());\n\nreturn [{\n  json: {\n    perfilCliente: response.perfilCliente,\n    recomendacoes: response.produtosRecomendados,\n    cupomDesconto: response.mensagemPersonalizada.match(/cupom[:\\s]+(\\w+)/i)?.[1] || 'PROMO10',\n    mensagemIA: response.mensagemPersonalizada\n  }\n}];"
+        "jsCode": "const data = $input.first().json;\nconst pedido = data.body || data;\n\nconst cliente = pedido.cliente || '';\nconst cidade = pedido.cidade || '';\nconst valorTotal = Number(pedido.valorTotal) || 0;\nconst produtos = Array.isArray(pedido.produtos) ? pedido.produtos.join(', ') : '';\nconst pedidoId = pedido.id || 0;\n\nconst prompt = 'Consultor de vendas. Analise: Cliente=' + cliente + ', Cidade=' + cidade + ', Valor=R$' + valorTotal + ', Produtos=' + produtos + '. Regras: >2000=Premium cupom PREMIUM15, >1000=Gold cupom GOLD10, <=1000=Essencial cupom ESSENTIAL5. Retorne JSON: {\"perfilCliente\":\"...\",\"produtosRecomendados\":\"...\",\"mensagemPersonalizada\":\"... com cupom\"}';\n\nreturn [{ json: { prompt: prompt, pedidoId: pedidoId } }];"
+      },
+      "id": "code-0",
+      "name": "Montar Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [670, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-or-v1-SUA_KEY_AQUI"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "http://localhost:5678"
+            },
+            {
+              "name": "X-Title",
+              "value": "Loja Virtual"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'google/gemma-2-9b-it:free', messages: [{ role: 'system', content: 'Voce e um consultor de vendas. Responda APENAS com JSON valido.' }, { role: 'user', content: $json.prompt }], temperature: 0.7, max_tokens: 512 }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 50000
+      },
+      "id": "openrouter-1",
+      "name": "OpenRouter IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "check-choices",
+              "leftValue": "={{ $json.choices ? $json.choices.length : 0 }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-2",
+      "name": "Resposta Validada",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.choices[0].message.content;\nconst cleaned = raw.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\nconst response = JSON.parse(cleaned);\n\nconst pedidoId = $('Montar Prompt').first().json.pedidoId;\n\nreturn [{\n  json: {\n    id: pedidoId,\n    perfilCliente: response.perfilCliente || 'Cliente Essencial',\n    recomendacoes: response.produtosRecomendados || '',\n    cupomDesconto: (response.mensagemPersonalizada || '').match(/cupom[:\\s]+(\\w+)/i)?.[1] || 'PROMO10',\n    mensagemIA: response.mensagemPersonalizada || ''\n  }\n}];"
       },
       "id": "code-1",
       "name": "Formatar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [750, 300]
+      "position": [1360, 300]
     },
     {
       "parameters": {
         "method": "PUT",
-        "url": "=http://SEU_NGROK_URL/pedidos/{{ $('Webhook Pedido').first().json.id }}/analise",
+        "url": "=http://localhost:8080/pedidos/{{ $json.id }}/analise",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}",
-        "options": {
-          "timeout": 10000
-        }
+        "jsonBody": "={{ JSON.stringify({ perfilCliente: $json.perfilCliente, recomendacoes: $json.recomendacoes, cupomDesconto: $json.cupomDesconto, mensagemIA: $json.mensagemIA }) }}",
+        "options": {}
       },
       "id": "http-1",
       "name": "Enviar para Backend",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1000, 300]
+      "position": [1590, 300]
     }
   ],
   "connections": {
     "Webhook Pedido": {
       "main": [
-        [{ "node": "Gemini IA", "type": "main", "index": 0 }]
+        [{ "node": "Validar Dados", "type": "main", "index": 0 }]
       ]
     },
-    "Gemini IA": {
+    "Validar Dados": {
+      "main": [
+        [{ "node": "Montar Prompt", "type": "main", "index": 0 }]
+      ]
+    },
+    "Montar Prompt": {
+      "main": [
+        [{ "node": "OpenRouter IA", "type": "main", "index": 0 }]
+      ]
+    },
+    "OpenRouter IA": {
+      "main": [
+        [{ "node": "Resposta Validada", "type": "main", "index": 0 }]
+      ]
+    },
+    "Resposta Validada": {
       "main": [
         [{ "node": "Formatar Resposta", "type": "main", "index": 0 }]
       ]
