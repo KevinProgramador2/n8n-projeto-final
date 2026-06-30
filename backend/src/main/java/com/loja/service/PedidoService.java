@@ -49,16 +49,14 @@ public class PedidoService {
 
             List<String> produtosLista = objectMapper.readValue(
                     pedido.getProdutos(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
-            );
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
 
             Map<String, Object> body = Map.of(
                     "id", pedido.getId(),
                     "cliente", pedido.getCliente(),
                     "cidade", pedido.getCidade(),
                     "valorTotal", pedido.getValorTotal(),
-                    "produtos", produtosLista
-            );
+                    "produtos", produtosLista);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -69,8 +67,7 @@ public class PedidoService {
                     n8nWebhookUrl,
                     HttpMethod.POST,
                     entity,
-                    String.class
-            );
+                    String.class);
 
             log.info("Pedido {} enviado para n8n. Status: {}", pedido.getId(), response.getStatusCode());
 
