@@ -19,7 +19,9 @@ O sistema opera de forma assíncrona para não sobrecarregar o servidor principa
 3. O Backend dispara um Webhook para o orquestrador **n8n**.
 4. O **n8n** aciona um modelo de Inteligência Artificial (LLM) que analisa os produtos comprados e o valor total.
 5. O n8n formata a resposta e faz um `PUT` de volta para o Backend.
-6. O Frontend, via *polling*, detecta a atualização e exibe o perfil, as recomendações e o cupom ao cliente.
+6. O Frontend, via *polling*, detecta a atualização e exibe o perfil, as recomendações e o cupom ao cliente. 
+
+
 
 ---
 
