@@ -58,6 +58,47 @@ A API foi projetada de forma modular:
 1. Navegue até a pasta do backend: `cd backend`
 2. Certifique-se de ter o Maven e o Java instalados.
 3. Execute a aplicação:
-   ```bash
-   
-   ./mvnw spring-boot:run
+
+   ```mvnw spring-boot:run```
+
+   ## 👥 Integrantes do Projeto
+
+Este aplicativo foi desenvolvido colaborativamente por:
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/KevinProgramador2">
+        <img src="https://github.com/KevinProgramador2.png" width="100px;" alt="KevinProgramador2"/><br />
+        <sub><b>KevinProgramador2</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/lhmillan">
+        <img src="https://github.com/lhmillan.png" width="100px;" alt="nisgri"/><br />
+        <sub><b>lhmillan</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/RodolphoAlmeida-FS">
+        <img src="https://github.com/RodolphoAlmeida-FS.png" width="100px;" alt="MadowRod"/><br />
+        <sub><b>RodolphoAlmeida-FS</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/leandrotcdev">
+        <img src="https://github.com/leandrotcdev.png" width="100px;" alt="RafaelSilvc"/><br />
+        <sub><b>leandrotcdev</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/bernardocaetano7">
+        <img src="https://github.com/bernardocaetano7.png" width="100px;" alt="pedroteixeira5"/><br />
+        <sub><b>bernardocaetano7</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+=======
+ 
+  
