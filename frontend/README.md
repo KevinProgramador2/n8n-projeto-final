@@ -1,16 +1,62 @@
-# React + Vite
+# 🛒 E-Commerce Inteligente: Automação e IA com n8n
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+[![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![n8n](https://img.shields.io/badge/n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white)](https://n8n.io/)
 
-Currently, two official plugins are available:
+Um projeto Full-Stack focado na **Integração de Tecnologias Web com Inteligência Artificial**. Esta aplicação simula o fluxo de uma Loja Virtual onde a finalização de um pedido aciona uma automação assíncrona no **n8n**, utilizando IA Generativa para analisar o perfil do cliente, recomendar produtos e gerar mensagens personalizadas de pós-venda.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Projeto desenvolvido como parte das atividades da **Residência em TIC Software (Serratec)**.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ⚙️ Arquitetura e Fluxo de Dados (Event-Driven AI)
 
-## Expanding the Oxlint configuration
+O sistema opera de forma assíncrona para não sobrecarregar o servidor principal:
+1. O usuário finaliza o pedido no **Frontend (React)**.
+2. O **Backend (Spring Boot)** salva o pedido no banco de dados com o status `AGUARDANDO_IA`.
+3. O Backend dispara um Webhook para o orquestrador **n8n**.
+4. O **n8n** aciona um modelo de Inteligência Artificial (LLM) que analisa os produtos comprados e o valor total.
+5. O n8n formata a resposta e faz um `PUT` de volta para o Backend.
+6. O Frontend, via *polling*, detecta a atualização e exibe o perfil, as recomendações e o cupom ao cliente.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+---
+
+## 🚀 Tecnologias Utilizadas
+
+### Backend
+* **Java + Spring Boot:** Motor da API REST e regras de negócio.
+* **Spring Data JPA & H2 Database:** Persistência de dados em memória para agilidade no desenvolvimento.
+* **WebClient / RestTemplate:** Para disparo do Webhook assíncrono.
+
+### Frontend
+* **React + Vite:** Interface visual reativa e de alta performance.
+* **TailwindCSS:** Estilização moderna.
+* **Axios:** Consumo da API REST.
+* **Acessibilidade (a11y):** Interface totalmente navegável via teclado, com alto contraste e marcações ARIA.
+
+### Automação & IA
+* **n8n:** Orquestração de fluxos de trabalho e chamadas de API.
+* **Google Gemini (ou Basic LLM):** Análise cognitiva e estruturação de dados em formato JSON.
+
+---
+
+## 🛣️ Endpoints da API
+
+A API foi projetada de forma modular:
+
+* `POST /pedidos` - Registra um novo pedido e aciona o Webhook da IA.
+* `GET /pedidos/{id}` - Consulta o status e os dados de um pedido específico.
+* `PUT /pedidos/{id}/analise` - Rota restrita, consumida pelo n8n para devolver a análise gerada pela IA.
+
+---
+
+## 💻 Como rodar o projeto localmente
+
+### 1. Backend (Spring Boot)
+1. Navegue até a pasta do backend: `cd backend`
+2. Certifique-se de ter o Maven e o Java instalados.
+3. Execute a aplicação:
+   ```bash
+   ./mvnw spring-boot:run
