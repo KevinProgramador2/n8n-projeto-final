@@ -58,7 +58,6 @@ A API foi projetada de forma modular:
 1. Navegue até a pasta do backend: `cd backend`
 2. Certifique-se de ter o Maven e o Java instalados.
 3. Execute a aplicação:
-   bash
 
    ```mvnw spring-boot:run```
 
@@ -100,3 +99,6 @@ Este aplicativo foi desenvolvido colaborativamente por:
     </td>
   </tr>
 </table>
+=======
+ 
+  
