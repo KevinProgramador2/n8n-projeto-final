@@ -1,0 +1,137 @@
+{
+  "name": "Analise de Pedido com IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pedido-analise",
+        "options": {}
+      },
+      "id": "e8934377-0e5a-499b-86a3-07e7cb769c59",
+      "name": "Webhook Pedido",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        -16
+      ],
+      "webhookId": "93e1062e-ea04-4945-a9f2-3615443a8931"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse(\n  $input.first().json.content.parts[0].text\n    .replace('```json', '')\n    .replace('```', '')\n    .trim()\n);\n\nreturn [{\n  json: {\n    perfilCliente: response.perfilCliente,\n    recomendacoes: Array.isArray(response.produtosRecomendados)\n      ? response.produtosRecomendados.join(', ')\n      : response.produtosRecomendados,\n    cupomDesconto:\n      response.mensagemPersonalizada.match(/cupom[:\\s]+(\\w+)/i)?.[1] || 'PROMO10',\n    mensagemIA: response.mensagemPersonalizada\n  }\n}];"
+      },
+      "id": "3b990554-02a8-4371-9c0f-0713a184b099",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://localhost:8080/pedidos/{{ $('Webhook Pedido').item.json.body.id }}/analise",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "577a37ed-65d8-4baf-9336-821bc2bc88cc",
+      "name": "Enviar para Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um consultor de vendas de uma loja virtual.\nAnalise o pedido recebido.\n{{ $json.body.produtos }}\n{{ $json.body.valorTotal }}\n{{ $json.body.valorTotal }}\n{{ $json.body.cidade }}\n{{ $json.body.cliente }}\nRetorne um JSON contendo:\n- perfilCliente\n- produtosRecomendados\n- mensagemPersonalizada\nConsidere o valor da compra e os produtos adquiridos.\nResposta esperada\n{\n\"perfilCliente\":\"Cliente Premium\",\n\"produtosRecomendados\":[\n\"Headset Gamer\",\n\"SSD 1TB\",\n\"Mochila para Notebook\"\n],\n\"mensagemPersonalizada\":\"Obrigado pela compra! Você ganhou um cupom de 10% para sua\npróxima compra.\"\n}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -16
+      ],
+      "id": "d3b5f572-c454-4940-8e91-c6f2a5bdd7ad",
+      "name": "Envio de prompt pro Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LVZpsuYHr0LPhCef",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Pedido": {
+      "main": [
+        [
+          {
+            "node": "Envio de prompt pro Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Enviar para Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envio de prompt pro Gemini": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5c63d196-3cb1-4526-8b52-ae436bebc1c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "19f499c0b5ac04aef1eacebf79e1cf1e539a9103b7ed9692f54dbb0484701140"
+  },
+  "nodeGroups": [],
+  "id": "otX8ytBLZr7twbdj",
+  "tags": []
+}
