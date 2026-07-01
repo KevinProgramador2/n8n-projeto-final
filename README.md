@@ -77,25 +77,25 @@ Este aplicativo foi desenvolvido colaborativamente por:
     </td>
     <td align="center">
       <a href="https://github.com/lhmillan">
-        <img src="https://github.com/lhmillan.png" width="100px;" alt="nisgri"/><br />
+        <img src="https://github.com/lhmillan.png" width="100px;" alt="lhmillan"/><br />
         <sub><b>lhmillan</b></sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/RodolphoAlmeida-FS">
-        <img src="https://github.com/RodolphoAlmeida-FS.png" width="100px;" alt="MadowRod"/><br />
+        <img src="https://github.com/RodolphoAlmeida-FS.png" width="100px;" alt="RodolphoAlmeida-FS"/><br />
         <sub><b>RodolphoAlmeida-FS</b></sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/leandrotcdev">
-        <img src="https://github.com/leandrotcdev.png" width="100px;" alt="RafaelSilvc"/><br />
+        <img src="https://github.com/leandrotcdev.png" width="100px;" alt="leandrotcdev"/><br />
         <sub><b>leandrotcdev</b></sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/bernardocaetano7">
-        <img src="https://github.com/bernardocaetano7.png" width="100px;" alt="pedroteixeira5"/><br />
+        <img src="https://github.com/bernardocaetano7.png" width="100px;" alt="bernardocaetano7"/><br />
         <sub><b>bernardocaetano7</b></sub>
       </a>
     </td>
@@ -103,6 +103,3 @@ Este aplicativo foi desenvolvido colaborativamente por:
 </table>
 
 
-
- 
-  
