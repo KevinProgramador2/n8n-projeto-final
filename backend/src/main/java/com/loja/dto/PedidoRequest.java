@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class PedidoRequest {
     private String cidade;
 
     @NotNull(message = "Valor total e obrigatorio")
-    private Double valorTotal;
+    private BigDecimal valorTotal;
 
     @NotNull(message = "Produtos sao obrigatorios")
     private List<String> produtos;

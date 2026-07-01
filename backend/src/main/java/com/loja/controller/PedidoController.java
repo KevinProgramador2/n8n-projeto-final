@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/pedidos")
 @RequiredArgsConstructor
@@ -38,14 +36,5 @@ public class PedidoController {
     public ResponseEntity<Pedido> buscarPedido(@PathVariable Long id) {
         Pedido pedido = pedidoService.buscarPedido(id);
         return ResponseEntity.ok(pedido);
-    }
-
-    @GetMapping("/{id}/status")
-    public ResponseEntity<Map<String, Object>> statusAnalise(@PathVariable Long id) {
-        Pedido pedido = pedidoService.buscarPedido(id);
-        return ResponseEntity.ok(Map.of(
-                "id", pedido.getId(),
-                "analisePronta", pedido.getAnalise() != null
-        ));
     }
 }

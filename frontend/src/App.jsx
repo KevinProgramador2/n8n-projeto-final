@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import FormularioPedido from './components/FormularioPedido';
 import ResultadoAnalise from './components/ResultadoAnalise';
 import LoadingSpinner from './components/LoadingSpinner';
-import './App.css';
+import './index.css';
 
 function App() {
   const [pedido, setPedido] = useState(null);
@@ -12,17 +13,21 @@ function App() {
 
   const verificarAnalise = useCallback(async (pedidoId) => {
     try {
-      const response = await fetch(`http://localhost:8080/pedidos/${pedidoId}`);
-      if (!response.ok) throw new Error('Erro ao buscar pedido.');
-
-      const data = await response.json();
-      if (data.analise) {
-        setAnalise(data.analise);
+      const response = await axios.get(`http://localhost:8080/pedidos/${pedidoId}`);
+      const data = response.data;
+      if (data.statusAnalise === 'CONCLUIDO') {
+        setAnalise({
+          perfilCliente: data.perfilCliente,
+          recomendacoes: data.recomendacoes,
+          cupomDesconto: data.cupomDesconto,
+          mensagemIA: data.mensagemIA
+        });
         setEstaCarregando(false);
         return true;
       }
       return false;
-    } catch {
+    } catch (error) {
+      console.error("Erro ao verificar status da análise:", error);
       return false;
     }
   }, []);
@@ -41,11 +46,11 @@ function App() {
       if (pronta || tentativas >= maxTentativas) {
         clearInterval(intervalo);
         if (!pronta) {
-          setErro('A analise esta demorando. Verifique o n8n e tente novamente.');
+          setErro('A análise esta demorando. Verifique o n8n e tente novamente.');
           setEstaCarregando(false);
         }
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(intervalo);
   }, [pedido, analise, verificarAnalise]);
@@ -92,8 +97,8 @@ function App() {
               <h2>Pedido #{pedido.id}</h2>
               <p><strong>Cliente:</strong> {pedido.cliente}</p>
               <p><strong>Cidade:</strong> {pedido.cidade}</p>
-              <p><strong>Valor:</strong> R$ {pedido.valorTotal.toFixed(2)}</p>
-              <p><strong>Produtos:</strong> {JSON.parse(pedido.produtos).join(', ')}</p>
+              <p><strong>Valor:</strong> R$ {pedido.valorTotal}</p>
+              <p><strong>Produtos:</strong> {pedido.produtos.join(', ')}</p>
             </div>
             <ResultadoAnalise analise={analise} />
             <button onClick={handleNovoPedido} className="btn-novo-pedido">

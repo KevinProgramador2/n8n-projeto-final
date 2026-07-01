@@ -1,34 +1,19 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function FormularioPedido({ onPedidoCriado, estaCarregando }) {
   const [cliente, setCliente] = useState('');
   const [cidade, setCidade] = useState('');
   const [valorTotal, setValorTotal] = useState('');
-  const [produtos, setProdutos] = useState(['']);
+  const [produtos, setProdutos] = useState('');
   const [erro, setErro] = useState('');
-
-  const adicionarProduto = () => {
-    setProdutos([...produtos, '']);
-  };
-
-  const removerProduto = (index) => {
-    if (produtos.length > 1) {
-      setProdutos(produtos.filter((_, i) => i !== index));
-    }
-  };
-
-  const atualizarProduto = (index, valor) => {
-    const novosProdutos = [...produtos];
-    novosProdutos[index] = valor;
-    setProdutos(novosProdutos);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
 
-    const produtosFiltrados = produtos.filter(p => p.trim() !== '');
-    if (produtosFiltrados.length === 0) {
+    const produtosLista = produtos.split(',').map(p => p.trim()).filter(p => p !== '');
+    if (produtosLista.length === 0) {
       setErro('Adicione pelo menos um produto.');
       return;
     }
@@ -40,26 +25,20 @@ export default function FormularioPedido({ onPedidoCriado, estaCarregando }) {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cliente,
-          cidade,
-          valorTotal: valor,
-          produtos: produtosFiltrados,
-        }),
+      const response = await axios.post('http://localhost:8080/pedidos', {
+        cliente,
+        cidade,
+        valorTotal: valor,
+        produtos: produtosLista,
       });
 
-      if (!response.ok) throw new Error('Erro ao criar pedido.');
-
-      const pedido = await response.json();
+      const pedido = response.data;
       onPedidoCriado(pedido);
 
       setCliente('');
       setCidade('');
       setValorTotal('');
-      setProdutos(['']);
+      setProdutos('');
     } catch (err) {
       setErro('Falha ao enviar pedido. Tente novamente.');
     }
@@ -112,35 +91,16 @@ export default function FormularioPedido({ onPedidoCriado, estaCarregando }) {
         </div>
 
         <div className="campo">
-          <label>Produtos *</label>
-          {produtos.map((produto, index) => (
-            <div key={index} className="produto-input">
-              <input
-                type="text"
-                value={produto}
-                onChange={(e) => atualizarProduto(index, e.target.value)}
-                placeholder={`Produto ${index + 1}`}
-                aria-label={`Produto ${index + 1}`}
-              />
-              {produtos.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removerProduto(index)}
-                  className="btn-remover"
-                  aria-label={`Remover produto ${index + 1}`}
-                >
-                  X
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={adicionarProduto}
-            className="btn-adicionar"
-          >
-            + Adicionar Produto
-          </button>
+          <label htmlFor="produtos">Produtos * (separados por vírgula)</label>
+          <input
+            id="produtos"
+            type="text"
+            value={produtos}
+            onChange={(e) => setProdutos(e.target.value)}
+            required
+            aria-required="true"
+            placeholder="Ex: Notebook, Mouse, Teclado"
+          />
         </div>
 
         {erro && (

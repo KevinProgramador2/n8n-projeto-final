@@ -3,7 +3,9 @@ package com.loja.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
@@ -21,14 +23,23 @@ public class Pedido {
 
     private String cidade;
 
-    private Double valorTotal;
+    private BigDecimal valorTotal;
 
-    @Column(columnDefinition = "TEXT")
-    private String produtos;
+    @ElementCollection
+    @CollectionTable(name = "pedido_produtos", joinColumns = @JoinColumn(name = "pedido_id"))
+    @Column(name = "produto")
+    private List<String> produtos;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "analise_id")
-    private AnalisePedido analise;
+    private String perfilCliente;
+
+    private String recomendacoes;
+
+    private String cupomDesconto;
+
+    private String mensagemIA;
+
+    @Column(length = 20)
+    private String statusAnalise;
 
     private LocalDateTime criadoEm;
 
@@ -38,6 +49,7 @@ public class Pedido {
     protected void onCreate() {
         criadoEm = LocalDateTime.now();
         atualizadoEm = LocalDateTime.now();
+        statusAnalise = "AGUARDANDO_IA";
     }
 
     @PreUpdate
